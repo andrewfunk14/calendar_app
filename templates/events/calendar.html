@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FullCalendar in Django</title>
+    {% load static %}
+
+    <!-- Include FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+
+    <!-- Include FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include Bootstrap for the modal (optional) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div id='calendar'></div>
+
+    <!-- Modal for event creation -->
+    <div class="modal fade" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Add Event</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="form-group">
+                            <label for="eventTitle">Event Title</label>
+                            <input type="text" class="form-control" id="eventTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventStart">Start Date</label>
+                            <input type="text" class="form-control" id="eventStart" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventEnd">End Date</label>
+                            <input type="text" class="form-control" id="eventEnd" readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Event</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FullCalendar Initialization Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: '/calendar/events/json/{{ year }}/{{ month }}/',  // URL to your JSON view
+                dateClick: function(info) {
+                    // Pre-fill the form with selected date
+                    $('#eventStart').val(info.dateStr);
+                    $('#eventEnd').val(info.dateStr);  // For simplicity, end date is the same
+
+                    // Show the modal
+                    $('#eventModal').modal('show');
+                }
+            });
+
+            calendar.render();
+
+            // Handle form submission
+            $('#eventForm').on('submit', function(e) {
+                e.preventDefault();
+                var title = $('#eventTitle').val();
+                var start = $('#eventStart').val();
+                var end = $('#eventEnd').val();
+
+                $.ajax({
+                    url: '/calendar/events/add/',  // Ensure this URL matches your Django URL
+                    method: 'POST',
+                    data: {
+                        title: title,
+                        start: start,
+                        end: end,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'  // Ensure CSRF token is correct
+                    },
+                    success: function(response) {
+                        $('#eventModal').modal('hide');
+                        calendar.refetchEvents();  // Refresh calendar to show the new event
+                    },
+                    error: function(response) {
+                        alert('There was an error saving the event.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
