@@ -3,75 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Our Site</title>
+    <title>Welcome to Our Scheduling Service</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'landing/styles.css' %}">
     <style>
+        /* Body Styling */
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f5;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             height: 100vh;
             text-align: center;
         }
 
+        /* Header Styling */
         header {
-            background-color: #3498db;
+            background-color: #3498db; /* Light blue */
             color: white;
-            padding: 40px;
+            padding: 60px 20px;
             width: 100%;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             margin: 0;
-            font-size: 3em;
+            font-size: 3.5em;
             letter-spacing: 1px;
         }
 
         p {
-            font-size: 1.5em;
+            font-size: 1.4em;
             margin-top: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #f0f0f5;
         }
 
+        /* Button Styling */
         .btn {
             display: inline-block;
             margin-top: 30px;
-            padding: 15px 30px;
+            padding: 15px 35px;
             font-size: 1.2em;
             color: white;
-            background-color: #2980b9;
+            background-color: #2980b9; /* Slightly darker blue */
+            border-radius: 50px;
             text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
         .btn:hover {
             background-color: #1a6a94;
+            box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.3);
         }
 
-        footer {
-            margin-top: 50px;
-            font-size: 0.9em;
+        /* Company Info Styling */
+        .company-info {
+            background-color: #ffffff;
+            padding: 50px 25px;
+            max-width: 1000px;
+            margin: 40px auto;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .company-info h2 {
+            font-size: 2.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .company-info p {
+            font-size: 1.1em;
+            line-height: 1.8;
             color: #7f8c8d;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: #2c3e50;
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9em;
+            color: white;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Welcome to Our Professional Site</h1>
-        <p>Access exclusive services by logging into your account.</p>
-        <a href="{% url 'login' %}" class="btn">Login to Your Account</a>
+        <h1>Plan Better, Schedule Faster</h1>
+        <p>Simplify your scheduling process with our intuitive platform. Efficient, flexible, and built for your needs.</p>
+        <a href="{% url 'login' %}" class="btn">Login Now</a>
     </header>
 
+    <!-- Company Information Section -->
+    <div class="company-info">
+        <h2>About Us</h2>
+        <p>At <strong>Our Company</strong>, we provide a streamlined scheduling solution for businesses. Easy to use, customizable, and reliable — designed to make your life easier.</p>
+    </div>
+
     <footer>
-        &copy; 2024 Your Company Name. All rights reserved.
+        &copy; 2024 Our Company. All rights reserved. | <a href="mailto:support@ourcompany.com" style="color: #2980b9; text-decoration: none;">Contact Support</a>
     </footer>
 
 </body>
