@@ -3,107 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar</title>
+    <title>Event Calendar</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            min-height: 600px;
+        }
+
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #1a6a94;
+        }
+
+        .logout-container {
+            position: relative;
+            width: 100%;
+            text-align: right;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.4); 
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .submit-btn, .delete-btn {
+            width: 48%;
+            padding: 10px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+
+        .submit-btn:hover {
+            background-color: #1a6a94;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .time-fields {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .time-fields select {
+            width: 30%;
+        }
+    </style>
 </head>
 <body>
+
+    <div class="logout-container">
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+
     <h1>Event Calendar</h1>
-    <div id="calendar"></div>
+    <div class="container">
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Modal for adding/editing events -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Add/Edit Event</h2>
+            <form id="addEventForm">
+                <!-- Event Title -->
+                <label for="event-title">Event Title:</label>
+                <input type="text" id="event-title" name="title" required>
+
+                <!-- Start Date -->
+                <label for="event-start">Start Date:</label>
+                <input type="date" id="event-start-date" name="start-date" required>
+
+                <!-- Start Time -->
+                <label for="start-time">Start Time:</label>
+                <div class="time-fields">
+                    <select id="start-hour" required>
+                        <option value="">Hour</option>
+                        {% for hour in hours_range %}
+                            <option value="{{ hour }}">{{ hour }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="start-minute" required>
+                        <option value="00">00</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                    </select>
+                    <select id="start-ampm" required>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+
+                <!-- End Date -->
+                <label for="event-end">End Date:</label>
+                <input type="date" id="event-end-date" name="end-date" required>
+
+                <!-- End Time -->
+                <label for="end-time">End Time:</label>
+                <div class="time-fields">
+                    <select id="end-hour" required>
+                        <option value="">Hour</option>
+                        {% for hour in hours_range %}
+                            <option value="{{ hour }}">{{ hour }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="end-minute" required>
+                        <option value="00">00</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                    </select>
+                    <select id="end-ampm" required>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="modal-actions">
+                    <button type="submit" class="submit-btn">Save Event</button>
+                    <button type="button" id="deleteEventBtn" class="delete-btn" style="display: none;">Delete Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
+            var modal = document.getElementById("addEventModal");
+            var span = document.getElementsByClassName("close")[0];
+            var editingEventId = null;  // Store the ID of the event being edited
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                events: '/calendar/events/json/',  // Updated path for fetching JSON data
-                
-                // Allow users to add events
+                timeZone: 'local',  // Ensure the calendar works in the user's local time zone
+                events: '/calendar/events/json/',  // Fetch JSON data for events
+            
                 selectable: true,
                 select: function(info) {
-                    var title = prompt('Enter event title:');
-                    if (title) {
-                        $.ajax({
-                            url: '/calendar/events/add/',  // Updated path for adding events
-                            method: 'POST',
-                            data: {
-                                title: title,
-                                start: info.startStr,
-                                end: info.endStr,
-                                csrfmiddlewaretoken: '{{ csrf_token }}'
-                            },
-                            success: function() {
-                                calendar.refetchEvents();  // Refresh the events on the calendar
-                            },
-                            error: function() {
-                                alert('There was an error adding the event.');
-                            }
-                        });
+                    // Show the modal when a date is selected
+                    document.getElementById("event-start-date").value = info.startStr.split('T')[0];  // Populate date
+                    document.getElementById("event-end-date").value = info.endStr.split('T')[0];  // Populate date
+                    editingEventId = null;  // Reset the event ID for a new event
+                    document.getElementById('deleteEventBtn').style.display = 'none';  // Hide the delete button
+                    modal.style.display = "block";
+                },
+                editable: true,
+                eventClick: function(info) {
+                    // Populate the form with the existing event data
+                    editingEventId = info.event.id;
+                    document.getElementById("event-title").value = info.event.title;
+                    document.getElementById("event-start-date").value = info.event.start.toISOString().split('T')[0];
+                    document.getElementById("event-end-date").value = info.event.end ? info.event.end.toISOString().split('T')[0] : info.event.start.toISOString().split('T')[0];
+                    populateTimeFields(info.event.start, 'start');
+                    if (info.event.end) {
+                        populateTimeFields(info.event.end, 'end');
+                    } else {
+                        populateTimeFields(info.event.start, 'end');
                     }
+
+                    // Show the delete button when editing
+                    document.getElementById('deleteEventBtn').style.display = 'inline-block';
+                    modal.style.display = "block";
                 },
 
-                // Allow users to edit events by dragging and resizing
                 editable: true,
                 eventDrop: function(info) {
-                    $.ajax({
-                        url: '/calendar/events/edit/' + info.event.id + '/',  // Updated path for editing events
-                        method: 'POST',
-                        data: {
-                            title: info.event.title,
-                            start: info.event.start.toISOString(),
-                            end: info.event.end ? info.event.end.toISOString() : null,
-                            csrfmiddlewaretoken: '{{ csrf_token }}'
-                        },
-                        success: function() {
-                            calendar.refetchEvents();
-                        },
-                        error: function() {
-                            alert('There was an error updating the event.');
-                        }
-                    });
+                    updateEvent(info.event);  // Update event after drag-and-drop
                 },
                 eventResize: function(info) {
-                    $.ajax({
-                        url: '/calendar/events/edit/' + info.event.id + '/',  // Updated path for editing events
-                        method: 'POST',
-                        data: {
-                            title: info.event.title,
-                            start: info.event.start.toISOString(),
-                            end: info.event.end.toISOString(),
-                            csrfmiddlewaretoken: '{{ csrf_token }}'
-                        },
-                        success: function() {
-                            calendar.refetchEvents();
-                        },
-                        error: function() {
-                            alert('There was an error updating the event.');
-                        }
-                    });
-                },
-
-                // Allow users to delete events by clicking them
-                eventClick: function(info) {
-                    if (confirm('Do you want to delete this event?')) {
-                        $.ajax({
-                            url: '/calendar/events/delete/' + info.event.id + '/',  // Correct event ID is now passed
-                            method: 'POST',
-                            data: {
-                                csrfmiddlewaretoken: '{{ csrf_token }}'
-                            },
-                            success: function() {
-                                calendar.refetchEvents();
-                            },
-                            error: function() {
-                                alert('There was an error deleting the event.');
-                            }
-                        });
-                    }
+                    updateEvent(info.event);  // Update event after resizing
                 }
             });
 
             calendar.render();
+
+            // Close modal functionality
+            span.onclick = function() {
+                modal.style.display = "none";
+                editingEventId = null;  // Reset editing state
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    editingEventId = null;  // Reset editing state
+                }
+            }
+
+            // Handle form submission for adding or editing events
+            $('#addEventForm').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+            
+                var title = $('#event-title').val();
+                var startDate = $('#event-start-date').val();
+                var startHour = $('#start-hour').val();
+                var startMinute = $('#start-minute').val();
+                var startAmPm = $('#start-ampm').val();
+            
+                var endDate = $('#event-end-date').val();
+                var endHour = $('#end-hour').val();
+                var endMinute = $('#end-minute').val();
+                var endAmPm = $('#end-ampm').val();
+            
+                // Convert to UTC before sending to the server
+                var start = convertToUTC(startDate, startHour, startMinute, startAmPm);
+                var end = convertToUTC(endDate, endHour, endMinute, endAmPm);
+            
+                var eventData = {
+                    title: title,
+                    start: start,
+                    end: end,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                };
+
+                // Determine if it's an add or edit operation
+                var url = editingEventId ? '/calendar/events/edit/' + editingEventId + '/' : '/calendar/events/add/';
+                
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: eventData,
+                    success: function() {
+                        calendar.refetchEvents();  // Refresh the events on the calendar
+                        modal.style.display = "none";  // Close the modal
+                        editingEventId = null;  // Reset the event ID
+                    },
+                    error: function(response) {
+                        console.error(response.responseText);  // Log the error to the console
+                        alert('There was an error saving the event.');
+                    }
+                });
+            });
+
+            // Handle deleting an event
+            $('#deleteEventBtn').click(function() {
+                if (editingEventId && confirm('Are you sure you want to delete this event?')) {
+                    $.ajax({
+                        url: '/calendar/events/delete/' + editingEventId + '/',
+                        method: 'POST',
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function() {
+                            calendar.refetchEvents();  // Refresh the events on the calendar
+                            modal.style.display = "none";  // Close the modal
+                            editingEventId = null;  // Reset the event ID
+                        },
+                        error: function(response) {
+                            console.error(response.responseText);  // Log the error
+                            alert('There was an error deleting the event.');
+                        }
+                    });
+                }
+            });
+
+            // Convert date and time to UTC
+            function convertToUTC(date, hour, minute, ampm) {
+                // Convert to 24-hour format
+                if (ampm === 'PM' && hour !== '12') {
+                    hour = parseInt(hour) + 12;
+                } else if (ampm === 'AM' && hour === '12') {
+                    hour = '00';
+                }
+            
+                // Ensure hour and minute are two digits
+                hour = hour.toString().padStart(2, '0');
+                minute = minute.padStart(2, '0');
+            
+                // Construct a Date object from the date and time
+                var localDate = new Date(`${date}T${hour}:${minute}:00`);
+            
+                // Convert the local date to UTC
+                return localDate.toISOString();  // Return ISO string in UTC format
+            }
+
+            // Populate time fields for editing
+            function populateTimeFields(datetime, prefix) {
+                var hours = datetime.getHours();
+                var minutes = datetime.getMinutes();
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;  // Convert to 12-hour format
+
+                document.getElementById(prefix + "-hour").value = hours;
+                document.getElementById(prefix + "-minute").value = minutes.toString().padStart(2, '0');
+                document.getElementById(prefix + "-ampm").value = ampm;
+            }
+
+            function updateEvent(event) {
+                $.ajax({
+                    url: '/calendar/events/edit/' + event.id + '/',
+                    method: 'POST',
+                    data: {
+                        title: event.title,
+                        start: event.start.toISOString(),
+                        end: event.end ? event.end.toISOString() : null,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        calendar.refetchEvents();
+                    },
+                    error: function(response) {
+                        console.error(response.responseText);  // Log the error
+                        alert('There was an error updating the event.');
+                    }
+                });
+            }
+
         });
     </script>
 </body>

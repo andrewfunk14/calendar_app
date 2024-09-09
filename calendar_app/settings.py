@@ -41,7 +41,12 @@ INSTALLED_APPS = [
     'events' # Your app
 ]
 
+# Redirect users to login if they are not authenticated
+LOGIN_URL = 'login'
+
+# After login, redirect users to the calendar page
 LOGIN_REDIRECT_URL = '/calendar/'
+LOGOUT_REDIRECT_URL = '/'  # Redirect to the landing page after logout
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -129,3 +134,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
